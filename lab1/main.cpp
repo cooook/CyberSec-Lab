@@ -22,32 +22,38 @@ int main(int argc, char** argv) {
 
     parser(command, host, netmask);
 
-    printf("host: %s\n", host);
-
     netmask = (1 << (32 - netmask)) - 1;
     start_port = atoi(argv[2]);
     end_port = atoi(argv[3]);
 
-
     ip = fromIP2int(host);
-    // ip &= ~netmask;
+    ip &= ~netmask;
 
     int target_ip ;
-    in_addr addr; 
-    hostent *phost; 
+    // in_addr addr; 
+    hostent *phost;
+    sockaddr_in addr; 
 
-    for (int i = 0; i < netmask - 1; ++i) {
+    for (int i = 1; i <= netmask - 1; ++i) {
 
-        memset(host, 0, sizeof(host));
+        // memset(host, 0, sizeof(host));
         
         target_ip = ip | i;
         sprintf(host, "%d.%d.%d.%d", byte(target_ip, 3), 
             byte(target_ip, 2), byte(target_ip, 1), byte(target_ip, 0));
-        inet_pton(AF_INET, host, &addr);
+        inet_pton(AF_INET, host, &addr.sin_addr);
+        phost = gethostbyaddr((const char*)&addr.sin_addr, sizeof(addr.sin_addr), AF_INET);
+        addr.sin_family = AF_INET;
+        if (phost)
+            printf("Host: %s\n", phost -> h_name);
+        else
+            printf("Host: %s\n", host);
+
 
         for (int port = start_port; port <= end_port; ++port) {
-            if (scan_port(host, port) == 0)
-                printf("host:%s port:%d open!\n", host, port);
+            addr.sin_port = htons(port);
+            if (scan_port(addr) > 0)
+                printf("    |-ip:%s port:%d open!\n", host, port);
         }
     }
 
