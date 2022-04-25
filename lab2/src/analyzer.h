@@ -43,11 +43,6 @@ public:
     virtual void analyzer(const char* buffer, int len); 
 } ; 
 
-class igmp_sniffer:public ip_sniffer {
-public:
-    virtual void analyzer(const char* buffer, int len); 
-} ; 
-
 
 void Process(const char *buffer, int size);
 # endif

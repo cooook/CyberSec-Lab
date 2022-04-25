@@ -35,7 +35,6 @@ void Process(const char *buffer, int len) {
         break;
     case 2:  // IGMP
         ++ counter.igmp;
-        ProcessSniffer(buffer, len, igmp);
         break;
     case 6:  // TCP
         ++ counter.tcp;
@@ -153,7 +152,7 @@ void udp_sniffer::analyzer(const char* buffer, int len) {
     fprintf(fd,"IP Header\n");
     hexPrint(buffer, ip_pkg_len);
   
-    fprintf(fd,"TCP Header\n");
+    fprintf(fd,"UDP Header\n");
     hexPrint(buffer + ip_pkg_len, udp_header -> len);
   
     fprintf(fd,"Data Payload\n");
@@ -163,10 +162,28 @@ void udp_sniffer::analyzer(const char* buffer, int len) {
 
 
 void icmp_sniffer::analyzer(const char* buffer, int len) {
-    
-}
+    iphdr* ip_header;
+    icmphdr* icmp_header;
+    ip_header = (iphdr*)buffer;
+    int ip_pkg_len = ip_header -> ihl << 2;
+    icmp_header = (icmphdr*)(buffer + ip_pkg_len);
 
-
-void igmp_sniffer::analyzer(const char* buffer, int len) {
+    ip_sniffer::analyzer(buffer, len);
     
+    sockaddr_in addr; 
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_addr.s_addr = icmp_header->un.gateway;
+
+    fprintf(fd, "\nICMP Header\n");
+    fprintf(fd, "   |-Message Type        : %u\n", ntohl(icmp_header -> type));
+    fprintf(fd, "   |-Sub Code            : %u\n", ntohl(icmp_header -> code));
+    fprintf(fd, "   |-Check Sum           : %u\n", ntohl(icmp_header -> checksum));
+    fprintf(fd, "   |-Gateway             : %s\n", inet_ntoa(addr.sin_addr));
+
+    fprintf(fd,"IP Header\n");
+    hexPrint(buffer, ip_pkg_len);
+  
+    fprintf(fd,"ICMP Header\n");
+    hexPrint(buffer + ip_pkg_len, len - ip_pkg_len);
+
 }
