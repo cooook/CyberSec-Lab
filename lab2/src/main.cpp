@@ -66,6 +66,8 @@ int main(int argc, const char **argv) {
 
     signal_init(); 
     CLEARSCREEN(); 
+    showtime();
+    printf("Sniffer Start!\n");
     
     int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     bindDevice(sock, argv[1]);
