@@ -11,41 +11,10 @@
 
 protocol_counter counter; 
 
-class sniffer_logger {
-public:
-    static FILE* fd;
-    virtual void analyzer(const char* buffer, int len) = 0;
-    void analyzeMac(const char* buffer, int len) ;
 
-    void hexPrint(const char* buffer, int len);
-    // static void setLogFile(const char *filePath) { fd = fopen(filePath, "w"); }
-    // static void closeLogFile() { fclose(fd);  }
-} ;
 
-class ip_sniffer:public sniffer_logger {
-public:
-    virtual void analyzer(const char* buffer, int len); 
-} ; 
+FILE* sniffer_logger::fd;
 
-class tcp_sniffer:public ip_sniffer {
-public:
-    virtual void analyzer(const char* buffer, int len); 
-} ; 
-
-class udp_sniffer:public ip_sniffer {
-public:
-    virtual void analyzer(const char* buffer, int len); 
-} ; 
-
-class icmp_sniffer:public ip_sniffer {
-public:
-    virtual void analyzer(const char* buffer, int len); 
-} ; 
-
-class igmp_sniffer:public ip_sniffer {
-public:
-    virtual void analyzer(const char* buffer, int len); 
-} ; 
 
 # define ProcessSniffer(buffer, len, protocol)    {                 \
     protocol##_sniffer* sniffer = new protocol##_sniffer;           \
@@ -137,7 +106,7 @@ void tcp_sniffer::analyzer(const char* buffer, int len) {
     ip_header = (iphdr*)buffer;
     int ip_pkg_len = ip_header -> ihl << 2;
     tcp_header = (tcphdr*)(buffer + ip_pkg_len);
-    // ip_sniffer::analyzer(buffer, len);
+    ip_sniffer::analyzer(buffer, len);
     fprintf(fd, "\nTCP Header\n");
     fprintf(fd, "   |-Source Port          : %u\n",ntohs(tcp_header->source));
     fprintf(fd, "   |-Destination Port     : %u\n",ntohs(tcp_header->dest));
@@ -173,7 +142,7 @@ void udp_sniffer::analyzer(const char* buffer, int len) {
     ip_header = (iphdr*)buffer;
     int ip_pkg_len = ip_header -> ihl << 2;
     udp_header = (udphdr*)(buffer + ip_pkg_len);
-    // ip_sniffer::analyzer(buffer, len);
+    ip_sniffer::analyzer(buffer, len);
     fprintf(fd,"\nUDP Header\n");
 
     fprintf(fd, "   |-Source Port          : %u\n",         ntohs(udp_header->source));

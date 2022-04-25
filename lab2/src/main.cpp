@@ -12,6 +12,10 @@
 # include <sys/socket.h>
 # include <linux/if_ether.h>
 # include <poll.h>
+# include <sys/ioctl.h>
+# include <net/if.h>
+# include <linux/if_packet.h>
+# include <net/ethernet.h>
 
 
 # include <display.h>
@@ -40,18 +44,38 @@ void AddPollfd(int fd, int events, void (*func) (int)) {
     ++cnt; 
 }
 
-int main() {
+void bindDevice(int fd, const char *dev) {
+    struct sockaddr_ll sl;
+    struct ifreq ifr;
+
+    memset(&sl, 0x00, sizeof(sl));
+    memset(&ifr, 0x00, sizeof(ifr));
+    sl.sll_family = AF_PACKET;
+    sl.sll_protocol = htons(ETH_P_ALL);
+    strncpy(ifr.ifr_name, dev, sizeof(ifr.ifr_name));
+    ioctl(fd, SIOCGIFINDEX, &ifr);
+    sl.sll_ifindex = ifr.ifr_ifindex;
+    bind(fd, (struct sockaddr *)&sl, sizeof(sl));
+}
+
+int main(int argc, const char **argv) {
+    if (argc < 2) {
+        printf("Usage ./sniffer <device>");
+        return 0;
+    }
+
     signal_init(); 
     CLEARSCREEN(); 
     
     int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+    bindDevice(sock, argv[1]);
     
     AddPollfd(STDIN_FILENO, POLL_IN, stdin_handler);
     AddPollfd(sock, POLL_IN, socket_handler);
-    // sniffer_logger::setLogFile(LOG_FILE);
+    sniffer_logger::setLogFile(LOG_FILE);
     int res; 
     while (true) {
-        res = poll(pollfds, cnt, time_out) ;
+        res = poll(pollfds, cnt, -1) ;
         if (res <= 0) {
             printf("Poll error\n");
             break; 
@@ -64,6 +88,6 @@ int main() {
     }
 
     close(sock);
-    // sniffer_logger::closeLogFile();
+    sniffer_logger::closeLogFile();
     return 0; 
 }
