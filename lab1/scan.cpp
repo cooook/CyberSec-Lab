@@ -12,7 +12,7 @@ void connect_handler(int signum) {
 int connect_timeout(int sock, const sockaddr* paddr, socklen_t salen, int nsecs) {
     int result;
     signal(SIGALRM, connect_handler);
-    if (alarm(nsecs)) {
+    if (ualarm(nsecs, 0)) {
         printf("Error! Alarm already set");
     }
     result = connect(sock, paddr, salen);
@@ -39,7 +39,7 @@ int scan_port(char* host, int port) {
 	inet_pton(AF_INET, host, &addr.sin_addr);
 	addr.sin_port = htons(port);
 
-	status = connect_timeout(sock, (struct sockaddr*)&addr, sizeof(addr), 1);
+	status = connect_timeout(sock, (struct sockaddr*)&addr, sizeof(addr), 10);
 
 	return status;
 }

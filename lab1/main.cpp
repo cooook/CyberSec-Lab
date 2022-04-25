@@ -3,6 +3,7 @@
 # include <cstring>
 # include <stdlib.h>
 # include <stdio.h>
+# include <netdb.h>
 
 # define byte(_, __) ((_) >> (8 * __) & 0xff)
 
@@ -29,13 +30,28 @@ int main(int argc, char** argv) {
     ip = fromIP2int(host);
     ip &= ~netmask;
 
-    for (int i = 1; i < netmask - 1; ++i)
-        for (int port = start_port; port < end_port; ++port) {
-            register int target_ip = ip | i;
-            memset(host, 0, sizeof(host));
+    int target_ip ;
+    in_addr addr; 
+    hostent *phost; 
 
-            sprintf(host, "%d.%d.%d.%d", byte(target_ip, 3), 
-                byte(target_ip, 2), byte(target_ip, 1), byte(target_ip, 0));
+    for (int i = 1; i < netmask - 1; ++i) {
+
+        memset(host, 0, sizeof(host));
+        
+        target_ip = ip | i;
+        sprintf(host, "%d.%d.%d.%d", byte(target_ip, 3), 
+            byte(target_ip, 2), byte(target_ip, 1), byte(target_ip, 0));
+
+        inet_pton(AF_INET, host, &addr); 
+        phost = gethostbyaddr((const char*)&addr, sizeof(addr), AF_INET);
+        
+        if (phost)
+            printf("Host name:%s\n", phost -> h_name);
+        else 
+            printf("Host name:%s\n", host);
+
+        for (int port = start_port; port <= end_port; ++port) {
+
             if (inet_pton(AF_INET, host, buf) != 1)
             {
                 fprintf(stderr, "Host address error %s\n", host);
@@ -44,11 +60,9 @@ int main(int argc, char** argv) {
 
             if (scan_port(host, port) == 0)
                 printf("host:%s port:%d open!\n", host, port);
-
-            else    
-                printf("host:%s port:%d can't access!\n", host, port);
             
         }
+    }
 
     free(command);
     return 0; 
