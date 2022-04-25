@@ -1,6 +1,5 @@
 # ifndef __DISPLAY_H__
 # define _DISPLAY_H__
-# endif
 
 #include <stdio.h>
 
@@ -13,3 +12,4 @@
 #define	ZERO_COLOR "0"
 
 void showtime() ;
+# endif

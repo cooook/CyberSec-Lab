@@ -4,6 +4,7 @@
 # include <stdlib.h>
 # include <cstring> 
 # include <analyzer.h>
+# include <unistd.h>
 
 void exit_handler(int signum) {
     printf("Abort by user.\n");

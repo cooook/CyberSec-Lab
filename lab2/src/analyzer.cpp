@@ -201,7 +201,3 @@ void icmp_sniffer::analyzer(const char* buffer, int len) {
 void igmp_sniffer::analyzer(const char* buffer, int len) {
     
 }
-
-int main() {
-    return 0;
-}

@@ -1,6 +1,14 @@
 CXX = g++
+INCLUDE = 
+CXXFLAGS = -I.
+obj = $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+exe = sniffer
 
-# analyzer : 
+$(exe): $(obj)
+	$(CXX) $^ $(CXXFLAGS) -o $@
 
-*.o : *.c
-	$(CXX) $< -c -o $@
+*.o : *.cpp
+	$(CXX) $< $(CXXFLAGS) -c -o $@
+
+clean:
+	rm $(obj) $(exe)

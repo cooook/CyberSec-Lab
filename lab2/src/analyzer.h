@@ -1,10 +1,5 @@
 # ifndef __ANALYZER_H__
 # define __ANALYZER_H__
-# endif
-# include <unistd.h>
-# include <fcntl.h>
-# include <stdlib.h>
-# include <stdio.h>
 
 # define BUFFER_SIZE 0x1000
 
@@ -32,3 +27,4 @@ class igmp_sniffer;
 
 
 void Process(const char *buffer, int size);
+# endif
